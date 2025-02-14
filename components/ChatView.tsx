@@ -11,6 +11,21 @@ const ChatView = () => {
   const [loading, setLoading] = useState(false) // To manage loading state
   const [isGeneratingResponse, setIsGeneratingResponse] = useState(false) // To prevent multiple responses
 
+  // Load messages from localStorage when component mounts
+  useEffect(() => {
+    const savedMessages = localStorage.getItem('chatMessages')
+    if (savedMessages) {
+      setMessages(JSON.parse(savedMessages)) // Parse and set messages from localStorage
+    }
+  }, [])
+
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem('chatMessages', JSON.stringify(messages))
+    }
+  }, [messages]) // Run this effect whenever messages are updated
+
   // Handle user input submission
   const onGenerate = async (input: string) => {
     setMessages((prev) => [...prev, { role: 'user', content: input }])
@@ -19,7 +34,11 @@ const ChatView = () => {
 
   useEffect(() => {
     // Only generate AI response if the message was sent by the user and response isn't already being generated
-    if (messages.length > 0 && messages[messages.length - 1].role === 'user' && !isGeneratingResponse) {
+    if (
+      messages.length > 0 &&
+      messages[messages.length - 1].role === 'user' &&
+      !isGeneratingResponse
+    ) {
       GetAiResponse() // Generate AI response
     }
   }, [messages]) // Run this effect whenever messages are updated
@@ -33,11 +52,10 @@ const ChatView = () => {
       const result = await axios.post('/api/ai-chat', { prompt: PROMPT })
       console.log(result.data.result)
 
+      const aiResp = { role: 'ai', content: result.data.result }
+
       // Add AI response to messages
-      setMessages((prev) => [
-        ...prev,
-        { role: 'ai', content: result.data.result },
-      ])
+      setMessages((prev) => [...prev, aiResp ])
     } catch (error) {
       console.error('Error fetching AI response:', error)
     } finally {
