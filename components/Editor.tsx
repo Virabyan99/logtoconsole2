@@ -5,7 +5,10 @@ import { useEffect, useRef } from "react";
 import prettier from "prettier/standalone";
 import parserBabel from "prettier/plugins/babel";
 import parserEstree from "prettier/plugins/estree";
+import * as monaco from "monaco-editor";
 import Sandbox from "./Sandbox";
+import detectSyntaxErrors from "./detectSyntaxErrors";
+import lintCode from "./lintCode";
 
 const MonacoEditor = dynamic(() => import("@monaco-editor/react"), { ssr: false });
 
@@ -31,6 +34,7 @@ const Editor = ({ code, setCode, setOutput, setLogs }: EditorProps) => {
     if (value) {
       setCode(value);
       localStorage.setItem("editorCode", value);
+      updateEditorMarkers(value);
     }
   };
 
@@ -46,6 +50,7 @@ const Editor = ({ code, setCode, setOutput, setLogs }: EditorProps) => {
 
       setCode(formatted);
       localStorage.setItem("editorCode", formatted);
+      updateEditorMarkers(formatted);
     } catch (error) {
       console.error("Prettier formatting error:", error);
     }
@@ -62,6 +67,25 @@ const Editor = ({ code, setCode, setOutput, setLogs }: EditorProps) => {
         setLogs(result.logs || []);
       }
     });
+  };
+
+  // Update syntax error markers in the editor
+  const updateEditorMarkers = (code: string) => {
+    if (!editorRef.current) return;
+
+    const orphanErrors = detectSyntaxErrors(code);
+    const lintErrors = lintCode(code);
+
+    const markers = [...orphanErrors, ...lintErrors].map((err) => ({
+      startLineNumber: 1,
+      startColumn: err.index + 1,
+      endLineNumber: 1,
+      endColumn: err.index + (err.length || 2),
+      message: err.message,
+      severity: monaco.MarkerSeverity.Error,
+    }));
+
+    monaco.editor.setModelMarkers(editorRef.current.getModel(), "owner", markers);
   };
 
   return (
@@ -91,6 +115,7 @@ const Editor = ({ code, setCode, setOutput, setLogs }: EditorProps) => {
         onChange={handleEditorChange}
         onMount={(editor) => {
           editorRef.current = editor; // Store editor instance in ref
+          updateEditorMarkers(code); // Initial syntax check
         }}
         className="rounded-lg overflow-hidden"
       />

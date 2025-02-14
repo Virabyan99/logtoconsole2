@@ -37,7 +37,7 @@ export default function Home() {
         </div>
 
         {/* Display final output */}
-        <p className="mt-2 text-blue-400">🔹 Output: {output}</p>
+        <p className="mt-2  text-blue-400">🔹 Output: {output}</p>
       </div>
     </div>
   );
