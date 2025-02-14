@@ -3,6 +3,7 @@ import { useState } from "react";
 import Editor from "../components/Editor";
 import FileUploader from "../components/FileUploader";
 import RecentFiles from "../components/RecentFiles";
+import ChatView from "@/components/ChatView";
 
 export default function Home() {
   const [code, setCode] = useState("// Write JavaScript here...");
@@ -39,6 +40,7 @@ export default function Home() {
         {/* Display final output */}
         <p className="mt-2  text-blue-400">🔹 Output: {output}</p>
       </div>
+      <ChatView/>
     </div>
   );
 }
