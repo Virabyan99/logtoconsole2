@@ -10,17 +10,24 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.21.0",
     "@monaco-editor/react": "^4.7.0",
     "@radix-ui/react-slot": "^1.1.2",
+    "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "convex": "^1.19.2",
+<<<<<<< HEAD
     "dompurify": "^3.2.4",
+=======
+    "dedent": "^1.5.3",
+>>>>>>> 4dc99086aa941bc5488f2647e44885dee5460c48
     "lucide-react": "^0.475.0",
     "monaco-editor": "^0.52.2",
     "next": "15.1.7",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
+    "react-markdown": "^9.0.3",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7"
   },
