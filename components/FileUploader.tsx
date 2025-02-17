@@ -1,4 +1,6 @@
 import { useRef } from "react";
+import { Button } from "./ui/button";
+import { Upload } from "lucide-react";
 
 interface FileUploaderProps {
   onFileLoad: (name: string, content: string) => void;
@@ -7,36 +9,33 @@ interface FileUploaderProps {
 const FileUploader = ({ onFileLoad }: FileUploaderProps) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  const CHUNK_SIZE = 1024 * 100; // 100KB chunks
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const validExtensions = ["js", "json", "txt"];
-    const fileExtension = file.name.split(".").pop()?.toLowerCase();
-
-    if (!fileExtension || !validExtensions.includes(fileExtension)) {
-      alert("❌ Error: Only .js, .json, and .txt files are allowed.");
-      return;
-    }
-
     const reader = new FileReader();
+    let offset = 0;
+    let content = "";
+
     reader.onload = (e) => {
-      if (!e.target?.result || (e.target.result as string).trim() === "") {
-        alert("❌ Error: File is empty or invalid.");
-        return;
+      content += e.target.result as string;
+      offset += CHUNK_SIZE;
+
+      if (offset < file.size) {
+        readNextChunk();
+      } else {
+        onFileLoad(file.name, content);
       }
-
-      const content = e.target.result as string;
-      saveToRecentFiles(file.name, content);
-      onFileLoad(file.name, content);
     };
-    reader.readAsText(file);
-  };
 
-  const saveToRecentFiles = (name: string, content: string) => {
-    const recentFiles = JSON.parse(localStorage.getItem("recentFiles") || "[]");
-    const updatedFiles = [{ name, content }, ...recentFiles].slice(0, 5);
-    localStorage.setItem("recentFiles", JSON.stringify(updatedFiles));
+    const readNextChunk = () => {
+      const blob = file.slice(offset, offset + CHUNK_SIZE);
+      reader.readAsText(blob);
+    };
+
+    readNextChunk();
   };
 
   return (
@@ -47,12 +46,13 @@ const FileUploader = ({ onFileLoad }: FileUploaderProps) => {
         onChange={handleFileUpload}
         style={{ display: "none" }}
       />
-      <button
+      <Button
         onClick={() => fileInputRef.current?.click()}
-        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500"
+        className="px-4 py-2  text-white rounded-full bg-transparent hover:bg-gray-800 transition duration-300 "
       >
-        Upload File
-      </button>
+        
+       <Upload/>
+      </Button>
     </div>
   );
 };

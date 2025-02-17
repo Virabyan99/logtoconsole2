@@ -10,7 +10,7 @@ self.onmessage = function (event) {
     const originalConsoleError = console.error;
 
     console.log = (...args) => {
-      logs.push(`✅ ${args.map(arg => JSON.stringify(arg)).join(" ")}`);
+      logs.push(` ${args.map(arg => JSON.stringify(arg)).join(" ")}`);
     };
 
     console.warn = (...args) => {

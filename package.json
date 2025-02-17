@@ -12,19 +12,20 @@
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
     "@monaco-editor/react": "^4.7.0",
+    "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-slot": "^1.1.2",
+    "@radix-ui/react-visually-hidden": "^1.1.2",
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "convex": "^1.19.2",
-<<<<<<< HEAD
-    "dompurify": "^3.2.4",
-=======
     "dedent": "^1.5.3",
->>>>>>> 4dc99086aa941bc5488f2647e44885dee5460c48
+    "dompurify": "^3.2.4",
+    "html2canvas": "^1.4.1",
     "lucide-react": "^0.475.0",
     "monaco-editor": "^0.52.2",
     "next": "15.1.7",
+    "next-themes": "^0.4.4",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-markdown": "^9.0.3",
@@ -33,6 +34,7 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.26.8",
+    "@types/dompurify": "^3.0.5",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
