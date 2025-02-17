@@ -8,7 +8,7 @@ import detectSyntaxErrors from './detectSyntaxErrors'
 import lintCode from './lintCode'
 import FileUploader from './FileUploader'
 import { Button } from './ui/button'
-import { CirclePlay, Download, RotateCcw } from 'lucide-react'
+import { CirclePlay, Download, RotateCcw, Upload } from 'lucide-react'
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from './ui/dialog'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { Input } from './ui/input'
@@ -102,34 +102,37 @@ const Editor = ({
   }
 
   return (
-    <div
-      className={`relative border rounded-xl p-4 min-h-[500px] md:h-[700px] shadow-lg transition-all duration-300 
-      ${isDarkMode ? 'border-gray-800 bg-black text-white' : 'border-gray-300 bg-white text-black'}`}
-    >
-      {/* File Upload */}
-      <div className="absolute top-2 left-2 z-10 cursor-pointer">
+    <div className={`relative border rounded-xl p-4 min-h-[500px] md:h-[700px] shadow-lg transition-all duration-300 
+      ${isDarkMode ? "border-gray-800 bg-black text-white" : "border-gray-300 bg-white text-black"}`}>
+      {/* ✅ File Upload Button - Theme Adjusted */}
+      <div className={`absolute top-2 left-2 z-10 rounded-full cursor-pointer ${isDarkMode ? "hover:bg-gray-800 text-white" : "hover:bg-gray-200 text-black "} `}>
         <FileUploader onFileLoad={(name, content) => setCode(content)} />
       </div>
 
-      {/* Run Button */}
+      {/* ✅ Run Code Button */}
       <Button
         onClick={runCode}
         className={`absolute z-20 top-2 right-2 px-3 py-2 rounded-full bg-transparent transition duration-300 
-        ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-200'}`}
+        ${isDarkMode ? "hover:bg-gray-800 text-white" : "hover:bg-gray-200 text-black"}`}
       >
-        <CirclePlay size={24} stroke={isDarkMode ? '#fff' : '#333'} />
+        <CirclePlay size={24} stroke={isDarkMode ? "#fff" : "#333"} />
       </Button>
 
-      {/* Bottom Left - Open Download Dialog */}
+      {/* ✅ Download Button - Theme Adjusted */}
       <Button
         onClick={() => setIsDialogOpen(true)}
-        className="absolute bottom-2 left-2 px-3 py-2 text-white rounded-full bg-transparent hover:bg-gray-800 transition duration-300 cursor-pointer"
+        className={`absolute bottom-2 left-2 px-3 py-2 rounded-full bg-transparent transition duration-300 
+        ${isDarkMode ? "hover:bg-gray-800 text-white" : "hover:bg-gray-200 text-black"}`}
       >
-        <Download size={24} />
+        <Download size={24} stroke={isDarkMode ? "#fff" : "#333"} />
       </Button>
-      {/* Download Button */}
+
+      {/* ✅ Download Dialog - Adjusted for Dark & Light Mode */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-black text-white border-none shadow-md rounded-lg p-6 w-[500px] h-[200px]">
+        <DialogContent
+          className={`rounded-lg p-6 w-[500px] h-[200px] transition-all duration-300 
+          ${isDarkMode ? "bg-black text-white" : "bg-white text-black"}`}
+        >
           {/* Accessible but visually hidden title */}
           <VisuallyHidden>
             <DialogTitle>Enter File Name</DialogTitle>
@@ -138,10 +141,8 @@ const Editor = ({
           <Input
             onChange={(e) => setFileName(e.target.value)}
             placeholder="Type the file name"
-            className="w-full p-3 mt-10 text-xl border-none rounded-md bg-black text-white 
-             focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75 
-             focus:shadow-[0px_0px_15px_rgba(59,130,246,0.7)] 
-             transition-all duration-300"
+            className={`w-full p-3 mt-10 text-xl border-none rounded-md transition-all duration-300 
+            ${isDarkMode ? "bg-black text-white focus:ring-blue-500" : "bg-white text-black focus:ring-gray-400"}`}
           />
 
           <DialogFooter className="mt-4 flex justify-between">
@@ -161,61 +162,51 @@ const Editor = ({
         </DialogContent>
       </Dialog>
 
-      {/* Clear Editor Button */}
+      {/* ✅ Clear Editor Button */}
       <Button
         onClick={clearEditor}
         className={`absolute bottom-2 right-2 px-3 py-2 rounded-full bg-transparent transition duration-300 
-        ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-200'}`}
+        ${isDarkMode ? "hover:bg-gray-800" : "hover:bg-gray-200"}`}
       >
-        <RotateCcw size={24} stroke={isDarkMode ? '#fff' : '#333'} />
+        <RotateCcw size={24} stroke={isDarkMode ? "#fff" : "#333"} />
       </Button>
 
       {/* Monaco Editor */}
       <MonacoEditor
         height="600px"
         language="javascript"
-        theme={isDarkMode ? 'custom-dark' : 'custom-light'}
+        theme="vs-dark"
         value={code}
         options={{
           fontSize: 16,
           minimap: { enabled: false },
           automaticLayout: true,
+          lineNumbers: (lineNumber) => '•', // ✅ Replace numbers with dots
+          lineNumbersMinChars: 2, // ✅ Ensures dots are properly aligned
+          glyphMargin: false, // ✅ Removes additional margin
         }}
         onChange={handleEditorChange}
-        onMount={(editor) => {
+        onMount={(editor, monaco) => {
           editorRef.current = editor
+          updateEditorMarkers(code)
 
-          // Define themes
+          // ✅ Force Monaco Editor Background to Black
           monaco.editor.defineTheme('custom-dark', {
             base: 'vs-dark',
             inherit: true,
             rules: [],
             colors: {
-              'editor.background': '#000000',
-              'editor.foreground': '#ffffff',
-              'editor.lineHighlightBackground': '#222222',
+              'editor.background': '#000000', // ✅ Pure black
+              'editor.foreground': '#ffffff', // White text
+              'editor.lineHighlightBackground': '#000000',
               'editor.selectionBackground': '#333333',
               'editorCursor.foreground': '#ffffff',
             },
           })
 
-          monaco.editor.defineTheme('custom-light', {
-            base: 'vs',
-            inherit: true,
-            rules: [],
-            colors: {
-              'editor.background': '#ffffff',
-              'editor.foreground': '#000000',
-              'editor.lineHighlightBackground': '#f2f2f2',
-              'editor.selectionBackground': '#dcdcdc',
-              'editorCursor.foreground': '#000000',
-            },
-          })
-
-          // Set initial theme
-          monaco.editor.setTheme(isDarkMode ? 'custom-dark' : 'custom-light')
+          monaco.editor.setTheme('custom-dark')
         }}
-        className='mt-14'
+        className="rounded-lg mt-14 "
       />
     </div>
   )

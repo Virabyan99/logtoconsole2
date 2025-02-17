@@ -48,7 +48,7 @@ const FileUploader = ({ onFileLoad }: FileUploaderProps) => {
       />
       <Button
         onClick={() => fileInputRef.current?.click()}
-        className="px-4 py-2  text-white rounded-full bg-transparent hover:bg-gray-800 transition duration-300 "
+        className="px-4 py-2   rounded-full bg-transparent  transition duration-300 "
       >
         
        <Upload/>
