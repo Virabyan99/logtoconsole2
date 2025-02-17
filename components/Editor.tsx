@@ -105,7 +105,7 @@ const Editor = ({
     <div className={`relative border rounded-xl p-4 min-h-[500px] md:h-[700px] shadow-lg transition-all duration-300 
       ${isDarkMode ? "border-gray-800 bg-black text-white" : "border-gray-300 bg-white text-black"}`}>
       {/* ✅ File Upload Button - Theme Adjusted */}
-      <div className={`absolute top-2 left-2 z-10 rounded-full cursor-pointer ${isDarkMode ? "hover:bg-gray-800 text-white" : "hover:bg-gray-200 text-black "} `}>
+      <div className={`absolute top-2 left-2 z-10 rounded-full  cursor-pointer ${isDarkMode ? "hover:bg-gray-800 text-white" : "hover:bg-gray-200 text-black "} `}>
         <FileUploader onFileLoad={(name, content) => setCode(content)} />
       </div>
 
