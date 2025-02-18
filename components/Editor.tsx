@@ -2,7 +2,6 @@
 
 import dynamic from 'next/dynamic'
 import { useEffect, useRef, useState } from 'react'
-import * as monaco from 'monaco-editor'
 import Sandbox from './Sandbox'
 import detectSyntaxErrors from './detectSyntaxErrors'
 import lintCode from './lintCode'
@@ -13,6 +12,7 @@ import { Dialog, DialogContent, DialogFooter, DialogTitle } from './ui/dialog'
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden'
 import { Input } from './ui/input'
 
+// ✅ Load Monaco Editor dynamically to prevent SSR issues
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
   ssr: false,
 })
@@ -25,27 +25,23 @@ interface EditorProps {
   isDarkMode: boolean
 }
 
-const Editor = ({
-  code,
-  setCode,
-  setOutput,
-  setLogs,
-  isDarkMode,
-}: EditorProps) => {
+const Editor = ({ code, setCode, setOutput, setLogs, isDarkMode }: EditorProps) => {
   const editorRef = useRef<any>(null)
   const sandbox = new Sandbox()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [fileName, setFileName] = useState('script.js')
 
   useEffect(() => {
-    const savedCode = localStorage.getItem('editorCode')
-    if (savedCode) setCode(savedCode)
+    if (typeof window !== 'undefined') { // ✅ Prevents SSR errors
+      const savedCode = localStorage.getItem('editorCode')
+      if (savedCode) setCode(savedCode)
+    }
   }, [])
 
   const handleEditorChange = (value: string | undefined) => {
     if (value) {
       setCode(value)
-      localStorage.setItem('editorCode', value)
+      if (typeof window !== 'undefined') localStorage.setItem('editorCode', value)
       updateEditorMarkers(value)
     }
   }
@@ -62,43 +58,28 @@ const Editor = ({
     })
   }
 
-  const updateEditorMarkers = (code: string) => {
+  const updateEditorMarkers = async (code: string) => {
     if (!editorRef.current) return
-    const orphanErrors = detectSyntaxErrors(code)
-    const lintErrors = lintCode(code)
 
-    const markers = [...orphanErrors, ...lintErrors].map((err) => ({
-      startLineNumber: 1,
-      startColumn: err.index + 1,
-      endLineNumber: 1,
-      endColumn: err.index + (err.length || 2),
-      message: err.message,
-      severity: monaco.MarkerSeverity.Error,
-    }))
+    try {
+      const monaco = await import('monaco-editor') // ✅ Dynamically import Monaco
 
-    monaco.editor.setModelMarkers(
-      editorRef.current.getModel(),
-      'owner',
-      markers,
-    )
-  }
+      const orphanErrors = detectSyntaxErrors(code)
+      const lintErrors = lintCode(code)
 
-  // ✅ Clears Editor Content
-  const clearEditor = () => {
-    setCode('')
-    localStorage.removeItem('editorCode')
-  }
+      const markers = [...orphanErrors, ...lintErrors].map((err) => ({
+        startLineNumber: 1,
+        startColumn: err.index + 1,
+        endLineNumber: 1,
+        endColumn: err.index + (err.length || 2),
+        message: err.message,
+        severity: monaco.MarkerSeverity.Error,
+      }))
 
-  // ✅ Downloads File
-  const downloadFile = () => {
-    const blob = new Blob([code], { type: 'text/javascript' })
-    const link = document.createElement('a')
-    link.href = URL.createObjectURL(blob)
-    link.download = fileName.endsWith('.js') ? fileName : `${fileName}.js`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    setIsDialogOpen(false)
+      monaco.editor.setModelMarkers(editorRef.current.getModel(), 'owner', markers)
+    } catch (error) {
+      console.error('Error setting Monaco markers:', error)
+    }
   }
 
   return (
@@ -106,16 +87,12 @@ const Editor = ({
       className={`relative border rounded-xl p-4 min-h-[500px] md:h-[700px] shadow-lg transition-all duration-300 
       ${isDarkMode ? 'border-gray-800 bg-black text-white' : 'border-gray-300 bg-white text-black'}`}
     >
-      {/* ✅ File Upload Button - Theme Adjusted */}
-      {/* ✅ File Upload Button - Theme Fixed */}
+      {/* File Upload Button */}
       <div className="absolute top-2 left-2 z-10 rounded-full">
-        <FileUploader
-          onFileLoad={(name, content) => setCode(content)}
-          isDarkMode={isDarkMode}
-        />
+        <FileUploader onFileLoad={(name, content) => setCode(content)} isDarkMode={isDarkMode} />
       </div>
 
-      {/* ✅ Run Code Button */}
+      {/* Run Code Button */}
       <Button
         onClick={runCode}
         className={`absolute z-20 top-2 right-2 px-3 py-2 rounded-full bg-transparent transition duration-300 
@@ -124,7 +101,7 @@ const Editor = ({
         <CirclePlay size={24} stroke={isDarkMode ? '#fff' : '#333'} />
       </Button>
 
-      {/* ✅ Download Button - Theme Adjusted */}
+      {/* Download Button */}
       <Button
         onClick={() => setIsDialogOpen(true)}
         className={`absolute bottom-2 left-2 px-3 py-2 rounded-full bg-transparent transition duration-300 
@@ -133,13 +110,12 @@ const Editor = ({
         <Download size={24} stroke={isDarkMode ? '#fff' : '#333'} />
       </Button>
 
-      {/* ✅ Download Dialog - Adjusted for Dark & Light Mode */}
+      {/* Download Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent
           className={`rounded-lg p-6 w-[500px] h-[200px] transition-all duration-300 
           ${isDarkMode ? 'bg-black text-white' : 'bg-white text-black'}`}
         >
-          {/* Accessible but visually hidden title */}
           <VisuallyHidden>
             <DialogTitle>Enter File Name</DialogTitle>
           </VisuallyHidden>
@@ -153,7 +129,16 @@ const Editor = ({
 
           <DialogFooter className="mt-4 flex justify-between">
             <Button
-              onClick={downloadFile}
+              onClick={() => {
+                const blob = new Blob([code], { type: 'text/javascript' })
+                const link = document.createElement('a')
+                link.href = URL.createObjectURL(blob)
+                link.download = fileName.endsWith('.js') ? fileName : `${fileName}.js`
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+                setIsDialogOpen(false)
+              }}
               className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded-md text-lg font-semibold"
             >
               Save
@@ -168,9 +153,12 @@ const Editor = ({
         </DialogContent>
       </Dialog>
 
-      {/* ✅ Clear Editor Button */}
+      {/* Clear Editor Button */}
       <Button
-        onClick={clearEditor}
+        onClick={() => {
+          setCode('')
+          localStorage.removeItem('editorCode')
+        }}
         className={`absolute bottom-2 right-2 px-3 py-2 rounded-full bg-transparent transition duration-300 
         ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-200'}`}
       >
@@ -187,30 +175,32 @@ const Editor = ({
           fontSize: 16,
           minimap: { enabled: false },
           automaticLayout: true,
-          lineNumbers: (lineNumber) => '•', // ✅ Replace numbers with dots
-          lineNumbersMinChars: 2, // ✅ Ensures dots are properly aligned
-          glyphMargin: false, // ✅ Removes additional margin
+          lineNumbers: 'on',
+          glyphMargin: false,
         }}
         onChange={handleEditorChange}
-        onMount={(editor, monaco) => {
+        onMount={async (editor) => {
           editorRef.current = editor
           updateEditorMarkers(code)
 
-          // ✅ Define a fully black version of vs-dark
-          monaco.editor.defineTheme('custom-dark', {
-            base: 'vs-dark',
-            inherit: true,
-            rules: [],
-            colors: {
-              'editor.background': '#000000', // ✅ Pure Black Background
-              'editor.foreground': '#ffffff', // ✅ White Text
-              'editor.lineHighlightBackground': '#000000',
-              'editor.selectionBackground': '#333333',
-              'editorCursor.foreground': '#ffffff',
-            },
-          })
-
-          monaco.editor.setTheme(isDarkMode ? 'custom-dark' : 'vs-light')
+          try {
+            const monaco = await import('monaco-editor') // ✅ Dynamically import Monaco
+            monaco.editor.defineTheme('custom-dark', {
+              base: 'vs-dark',
+              inherit: true,
+              rules: [],
+              colors: {
+                'editor.background': '#000000',
+                'editor.foreground': '#ffffff',
+                'editor.lineHighlightBackground': '#000000',
+                'editor.selectionBackground': '#333333',
+                'editorCursor.foreground': '#ffffff',
+              },
+            })
+            monaco.editor.setTheme(isDarkMode ? 'custom-dark' : 'vs-light')
+          } catch (error) {
+            console.error('Error setting Monaco theme:', error)
+          }
         }}
         className="rounded-lg mt-14"
       />

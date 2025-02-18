@@ -1,3 +1,4 @@
+"use client";
 import { useRef } from "react";
 import { Button } from "./ui/button";
 import { Upload } from "lucide-react";

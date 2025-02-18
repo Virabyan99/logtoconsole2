@@ -27,10 +27,11 @@ export default function Home() {
   const targetRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Load theme preference from localStorage
-    const storedTheme = localStorage.getItem('theme')
-    if (storedTheme) {
-      setIsDarkMode(storedTheme === 'dark')
+    if (typeof window !== "undefined") { // ✅ Fix SSR issues
+      const storedTheme = localStorage.getItem('theme')
+      if (storedTheme) {
+        setIsDarkMode(storedTheme === 'dark')
+      }
     }
   }, [])
 
@@ -44,7 +45,10 @@ export default function Home() {
       })
 
       setCode(formatted)
-      localStorage.setItem('editorCode', formatted)
+
+      if (typeof window !== "undefined") { // ✅ Prevent SSR error
+        localStorage.setItem('editorCode', formatted)
+      }
     } catch (error) {
       console.error('Prettier formatting error:', error)
     }
@@ -58,7 +62,10 @@ export default function Home() {
   const toggleTheme = () => {
     const newTheme = !isDarkMode
     setIsDarkMode(newTheme)
-    localStorage.setItem('theme', newTheme ? 'dark' : 'light')
+
+    if (typeof window !== "undefined") { // ✅ Fix SSR issue
+      localStorage.setItem('theme', newTheme ? 'dark' : 'light')
+    }
   }
 
   // ✅ Save Snippet to API
@@ -90,14 +97,6 @@ export default function Home() {
           setLogs={setLogs}
           isDarkMode={isDarkMode}
         />
-
-        {/* ✅ Save Snippet Button */}
-        {/* <Button
-          onClick={saveSnippet}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500 transition"
-        >
-          Save Snippet
-        </Button> */}
       </div>
 
       {/* Right Side - Console Output */}

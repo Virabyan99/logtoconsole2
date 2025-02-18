@@ -1,3 +1,4 @@
+"use client";
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from "@/components/ui/dialog";
 import { useState } from "react";
 import html2canvas from "html2canvas";

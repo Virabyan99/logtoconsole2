@@ -1,8 +1,9 @@
+"use client";
 class Sandbox {
   private worker: Worker | null = null;
 
   constructor() {
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined") {  // ✅ Fix for server-side rendering
       this.worker = new Worker(new URL("../lib/worker.ts", import.meta.url), {
         type: "module",
       });
