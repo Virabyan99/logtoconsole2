@@ -10,15 +10,15 @@ self.onmessage = function (event) {
     const originalConsoleError = console.error;
 
     console.log = (...args) => {
-      logs.push(` ${args.map(arg => JSON.stringify(arg)).join(" ")}`);
+      logs.push(args.map(arg => JSON.stringify(arg, null, 2)).join(" "));
     };
 
     console.warn = (...args) => {
-      logs.push(`⚠️ ${args.map(arg => JSON.stringify(arg)).join(" ")}`);
+      logs.push(`⚠️ ${args.map(arg => JSON.stringify(arg, null, 2)).join(" ")}`);
     };
 
     console.error = (...args) => {
-      logs.push(`❌ ${args.map(arg => JSON.stringify(arg)).join(" ")}`);
+      logs.push(`❌ ${args.map(arg => JSON.stringify(arg, null, 2)).join(" ")}`);
     };
 
     const detectInfiniteLoop = (code: string) => {
@@ -46,6 +46,7 @@ self.onmessage = function (event) {
     try {
       const safeFunction = new Function('"use strict"; return (() => {' + code + '})()');
       result = safeFunction();
+      result = JSON.stringify(result, null, 2); // ✅ Pretty print objects
     } catch (error) {
       result = `❌ Runtime Error: ${error.message}`;
     }
