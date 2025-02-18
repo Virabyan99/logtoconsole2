@@ -15,7 +15,7 @@ import parserBabel from 'prettier/plugins/babel'
 import parserEstree from 'prettier/plugins/estree'
 
 export default function Home() {
-  const [code, setCode] = useState('// Write JavaScript here...')
+  const [code, setCode] = useState('console.log([1, 2, 3, {a:1, b:2}]);')
   const [output, setOutput] = useState('')
   const [logs, setLogs] = useState<string[]>([])
   const [screenshotDialogOpen, setScreenshotDialogOpen] = useState(false)
