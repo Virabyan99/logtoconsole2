@@ -4,9 +4,10 @@ import { Upload } from "lucide-react";
 
 interface FileUploaderProps {
   onFileLoad: (name: string, content: string) => void;
+  isDarkMode: boolean; // ✅ Accept dark mode prop
 }
 
-const FileUploader = ({ onFileLoad }: FileUploaderProps) => {
+const FileUploader = ({ onFileLoad, isDarkMode }: FileUploaderProps) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const CHUNK_SIZE = 1024 * 100; // 100KB chunks
@@ -48,10 +49,13 @@ const FileUploader = ({ onFileLoad }: FileUploaderProps) => {
       />
       <Button
         onClick={() => fileInputRef.current?.click()}
-        className="px-4 py-2   rounded-full bg-transparent text-white hover:bg-gray-800 transition duration-300 "
+        className={`px-4 py-2 rounded-full transition duration-300 
+          ${isDarkMode 
+            ? "bg-black text-white hover:bg-gray-700"
+            : " bg-white text-black hover:bg-gray-200"
+          }`}
       >
-        
-       <Upload/>
+        <Upload size={20} />
       </Button>
     </div>
   );

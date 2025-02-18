@@ -79,7 +79,7 @@ export default function Home() {
   return (
     <div
       ref={targetRef}
-      className={`p-6 grid md:grid-cols-2 gap-4 min-h-screen transition-all duration-300 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'}`}
+      className={`p-6 grid md:grid-cols-2 gap-4 min-h-screen transition-all duration-300 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-400 text-black'}`}
     >
       {/* Left Side - Editor */}
       <div className="space-y-4">

@@ -102,36 +102,42 @@ const Editor = ({
   }
 
   return (
-    <div className={`relative border rounded-xl p-4 min-h-[500px] md:h-[700px] shadow-lg transition-all duration-300 
-      ${isDarkMode ? "border-gray-800 bg-black text-white" : "border-gray-300 bg-white text-black"}`}>
+    <div
+      className={`relative border rounded-xl p-4 min-h-[500px] md:h-[700px] shadow-lg transition-all duration-300 
+      ${isDarkMode ? 'border-gray-800 bg-black text-white' : 'border-gray-300 bg-white text-black'}`}
+    >
       {/* ✅ File Upload Button - Theme Adjusted */}
-      <div className={`absolute top-2 left-2 z-10 rounded-full  cursor-pointer ${isDarkMode ? "hover:bg-gray-800 text-white" : "hover:bg-gray-200 text-black "} `}>
-        <FileUploader onFileLoad={(name, content) => setCode(content)} />
+      {/* ✅ File Upload Button - Theme Fixed */}
+      <div className="absolute top-2 left-2 z-10 rounded-full">
+        <FileUploader
+          onFileLoad={(name, content) => setCode(content)}
+          isDarkMode={isDarkMode}
+        />
       </div>
 
       {/* ✅ Run Code Button */}
       <Button
         onClick={runCode}
         className={`absolute z-20 top-2 right-2 px-3 py-2 rounded-full bg-transparent transition duration-300 
-        ${isDarkMode ? "hover:bg-gray-800 text-white" : "hover:bg-gray-200 text-black"}`}
+        ${isDarkMode ? 'hover:bg-gray-800 text-white' : 'hover:bg-gray-200 text-black'}`}
       >
-        <CirclePlay size={24} stroke={isDarkMode ? "#fff" : "#333"} />
+        <CirclePlay size={24} stroke={isDarkMode ? '#fff' : '#333'} />
       </Button>
 
       {/* ✅ Download Button - Theme Adjusted */}
       <Button
         onClick={() => setIsDialogOpen(true)}
         className={`absolute bottom-2 left-2 px-3 py-2 rounded-full bg-transparent transition duration-300 
-        ${isDarkMode ? "hover:bg-gray-800 text-white" : "hover:bg-gray-200 text-black"}`}
+        ${isDarkMode ? 'hover:bg-gray-800 text-white' : 'hover:bg-gray-200 text-black'}`}
       >
-        <Download size={24} stroke={isDarkMode ? "#fff" : "#333"} />
+        <Download size={24} stroke={isDarkMode ? '#fff' : '#333'} />
       </Button>
 
       {/* ✅ Download Dialog - Adjusted for Dark & Light Mode */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent
           className={`rounded-lg p-6 w-[500px] h-[200px] transition-all duration-300 
-          ${isDarkMode ? "bg-black text-white" : "bg-white text-black"}`}
+          ${isDarkMode ? 'bg-black text-white' : 'bg-white text-black'}`}
         >
           {/* Accessible but visually hidden title */}
           <VisuallyHidden>
@@ -142,7 +148,7 @@ const Editor = ({
             onChange={(e) => setFileName(e.target.value)}
             placeholder="Type the file name"
             className={`w-full p-3 mt-10 text-xl border-none rounded-md transition-all duration-300 
-            ${isDarkMode ? "bg-black text-white focus:ring-blue-500" : "bg-white text-black focus:ring-gray-400"}`}
+            ${isDarkMode ? 'bg-black text-white focus:ring-blue-500' : 'bg-white text-black focus:ring-gray-400'}`}
           />
 
           <DialogFooter className="mt-4 flex justify-between">
@@ -166,49 +172,48 @@ const Editor = ({
       <Button
         onClick={clearEditor}
         className={`absolute bottom-2 right-2 px-3 py-2 rounded-full bg-transparent transition duration-300 
-        ${isDarkMode ? "hover:bg-gray-800" : "hover:bg-gray-200"}`}
+        ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-200'}`}
       >
-        <RotateCcw size={24} stroke={isDarkMode ? "#fff" : "#333"} />
+        <RotateCcw size={24} stroke={isDarkMode ? '#fff' : '#333'} />
       </Button>
 
       {/* Monaco Editor */}
       <MonacoEditor
-  height="600px"
-  language="javascript"
-  theme={isDarkMode ? "custom-dark" : "vs-light"}
-  value={code}
-  options={{
-    fontSize: 16,
-    minimap: { enabled: false },
-    automaticLayout: true,
-    lineNumbers: (lineNumber) => "•", // ✅ Replace numbers with dots
-    lineNumbersMinChars: 2, // ✅ Ensures dots are properly aligned
-    glyphMargin: false, // ✅ Removes additional margin
-  }}
-  onChange={handleEditorChange}
-  onMount={(editor, monaco) => {
-    editorRef.current = editor;
-    updateEditorMarkers(code);
+        height="600px"
+        language="javascript"
+        theme={isDarkMode ? 'custom-dark' : 'vs-light'}
+        value={code}
+        options={{
+          fontSize: 16,
+          minimap: { enabled: false },
+          automaticLayout: true,
+          lineNumbers: (lineNumber) => '•', // ✅ Replace numbers with dots
+          lineNumbersMinChars: 2, // ✅ Ensures dots are properly aligned
+          glyphMargin: false, // ✅ Removes additional margin
+        }}
+        onChange={handleEditorChange}
+        onMount={(editor, monaco) => {
+          editorRef.current = editor
+          updateEditorMarkers(code)
 
-    // ✅ Define a fully black version of vs-dark
-    monaco.editor.defineTheme("custom-dark", {
-      base: "vs-dark",
-      inherit: true,
-      rules: [],
-      colors: {
-        "editor.background": "#000000", // ✅ Pure Black Background
-        "editor.foreground": "#ffffff", // ✅ White Text
-        "editor.lineHighlightBackground": "#000000",
-        "editor.selectionBackground": "#333333",
-        "editorCursor.foreground": "#ffffff",
-      },
-    });
+          // ✅ Define a fully black version of vs-dark
+          monaco.editor.defineTheme('custom-dark', {
+            base: 'vs-dark',
+            inherit: true,
+            rules: [],
+            colors: {
+              'editor.background': '#000000', // ✅ Pure Black Background
+              'editor.foreground': '#ffffff', // ✅ White Text
+              'editor.lineHighlightBackground': '#000000',
+              'editor.selectionBackground': '#333333',
+              'editorCursor.foreground': '#ffffff',
+            },
+          })
 
-    monaco.editor.setTheme(isDarkMode ? "custom-dark" : "vs-light");
-  }}
-  className="rounded-lg mt-14"
-/>
-
+          monaco.editor.setTheme(isDarkMode ? 'custom-dark' : 'vs-light')
+        }}
+        className="rounded-lg mt-14"
+      />
     </div>
   )
 }
