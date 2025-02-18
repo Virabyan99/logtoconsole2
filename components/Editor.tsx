@@ -175,35 +175,34 @@ const Editor = ({ code, setCode, setOutput, setLogs, isDarkMode }: EditorProps) 
           fontSize: 16,
           minimap: { enabled: false },
           automaticLayout: true,
-          lineNumbers: 'on',
-          glyphMargin: false,
+          lineNumbers: (lineNumber) => '•', // ✅ Replace numbers with dots
+          lineNumbersMinChars: 2, // ✅ Ensures dots are properly aligned
+          glyphMargin: false, // ✅ Removes additional margin
         }}
         onChange={handleEditorChange}
-        onMount={async (editor) => {
+        onMount={(editor, monaco) => {
           editorRef.current = editor
           updateEditorMarkers(code)
 
-          try {
-            const monaco = await import('monaco-editor') // ✅ Dynamically import Monaco
-            monaco.editor.defineTheme('custom-dark', {
-              base: 'vs-dark',
-              inherit: true,
-              rules: [],
-              colors: {
-                'editor.background': '#000000',
-                'editor.foreground': '#ffffff',
-                'editor.lineHighlightBackground': '#000000',
-                'editor.selectionBackground': '#333333',
-                'editorCursor.foreground': '#ffffff',
-              },
-            })
-            monaco.editor.setTheme(isDarkMode ? 'custom-dark' : 'vs-light')
-          } catch (error) {
-            console.error('Error setting Monaco theme:', error)
-          }
+          // ✅ Define a fully black version of vs-dark
+          monaco.editor.defineTheme('custom-dark', {
+            base: 'vs-dark',
+            inherit: true,
+            rules: [],
+            colors: {
+              'editor.background': '#000000', // ✅ Pure Black Background
+              'editor.foreground': '#ffffff', // ✅ White Text
+              'editor.lineHighlightBackground': '#000000',
+              'editor.selectionBackground': '#333333',
+              'editorCursor.foreground': '#ffffff',
+            },
+          })
+
+          monaco.editor.setTheme(isDarkMode ? 'custom-dark' : 'vs-light')
         }}
         className="rounded-lg mt-14"
       />
+
     </div>
   )
 }
