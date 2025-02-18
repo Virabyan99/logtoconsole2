@@ -165,6 +165,7 @@ export default function Home() {
       <ScreenshotDialog
         isOpen={screenshotDialogOpen}
         onClose={() => setScreenshotDialogOpen(false)}
+        targetRef={targetRef}
       />
     </div>
   )

@@ -17,56 +17,78 @@ const ScreenshotDialog: React.FC<ScreenshotDialogProps> = ({ isOpen, onClose, ta
   const handleCapture = async () => {
     if (!targetRef?.current) return;
   
-    // ✅ Get the selected width & height
-    let width = targetRef.current.offsetWidth;
-    let height = targetRef.current.offsetHeight;
+    try {
+      let width = targetRef.current.offsetWidth;
+      let height = targetRef.current.offsetHeight;
   
-    if (selectedSize !== "As in browser") {
-      switch (selectedSize) {
-        case "1×1":
-          width = 500;
-          height = 500;
-          break;
-        case "16×9":
-          width = 1280;
-          height = 720;
-          break;
-        case "9×16":
-          width = 720;
-          height = 1280;
-          break;
-        case "4×5":
-          width = 800;
-          height = 1000;
-          break;
-        case "5×4":
-          width = 1000;
-          height = 800;
-          break;
-        case "custom":
-          width = customSize.width ? parseInt(customSize.width) : width;
-          height = customSize.height ? parseInt(customSize.height) : height;
-          break;
+      if (selectedSize !== "As in browser") {
+        switch (selectedSize) {
+          case "1×1":
+            width = 500;
+            height = 500;
+            break;
+          case "16×9":
+            width = 1280;
+            height = 720;
+            break;
+          case "9×16":
+            width = 720;
+            height = 1280;
+            break;
+          case "4×5":
+            width = 800;
+            height = 1000;
+            break;
+          case "5×4":
+            width = 1000;
+            height = 800;
+            break;
+          case "custom":
+            width = customSize.width ? parseInt(customSize.width) : width;
+            height = customSize.height ? parseInt(customSize.height) : height;
+            break;
+        }
       }
+  
+      // ✅ Create a temporary container for proper scaling
+      const tempContainer = document.createElement("div");
+      tempContainer.style.position = "absolute";
+      tempContainer.style.left = "-9999px"; // Hide from view
+      tempContainer.style.width = `${width}px`;
+      tempContainer.style.height = `${height}px`;
+      tempContainer.style.transform = `scale(${width / targetRef.current.offsetWidth})`;
+      tempContainer.style.transformOrigin = "top left";
+  
+      // ✅ Clone content into temporary container
+      const clonedContent = targetRef.current.cloneNode(true);
+      tempContainer.appendChild(clonedContent);
+      document.body.appendChild(tempContainer);
+  
+      // ✅ Capture the properly scaled screenshot
+      const canvas = await html2canvas(tempContainer, {
+        backgroundColor: null,
+        useCORS: true,
+        allowTaint: false,
+        scale: 1, // Scaling is handled via CSS transform
+      });
+  
+      // ✅ Remove temporary container after capture
+      document.body.removeChild(tempContainer);
+  
+      // ✅ Convert canvas to image
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = "screenshot.png";
+  
+      // ✅ Trigger download
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  
+      onClose(); // ✅ Close dialog after capture
+    } catch (error) {
+      console.error("❌ Screenshot Capture Failed:", error);
     }
-  
-    // ✅ Capture the page with CORS fix
-    const canvas = await html2canvas(targetRef.current, {
-      backgroundColor: null,
-      useCORS: true, // ✅ Fixes tainted canvas
-      allowTaint: false,
-      scale: 2, // ✅ High-quality screenshot
-      width, // ✅ Resize based on user selection
-      height,
-    });
-  
-    // ✅ Create and download the image
-    const link = document.createElement("a");
-    link.href = canvas.toDataURL("image/png");
-    link.download = "screenshot.png";
-    link.click();
-  
-    onClose(); // Close dialog after capture
   };
   
 
